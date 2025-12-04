@@ -79,6 +79,7 @@ ROUTINE_DATA = [
         "Action Point": "Finalization of policy for routine optimization of RADARs",
         "Responsible": "GM(CNS-Sur)/ED(CNS-O&M)",
         "Accountable": "ED(CNS-O&M)",
+        "Open Date": date(2025, 1, 15),
         "Due Date": date(2025, 5, 22),
         "Status": "Open",
         "Priority": "Medium",
@@ -91,6 +92,7 @@ ROUTINE_DATA = [
         "Action Point": "Expansion of in-house repair capabilities for ADS-B sensors, ERA & Sensis ASMGCS sensors",
         "Responsible": "GM(CMC)/GM(CNS-P1)",
         "Accountable": "GM(CMC)",
+        "Open Date": date(2025, 1, 20),
         "Due Date": date(2025, 5, 22),
         "Status": "Open",
         "Priority": "High",
@@ -103,6 +105,7 @@ ROUTINE_DATA = [
         "Action Point": "Advance Factory Training Policy for SMU executives",
         "Responsible": "In-Charge ELDIS SMU/GM(CMC)",
         "Accountable": "GM(CMC)",
+        "Open Date": date(2025, 2, 1),
         "Due Date": date(2025, 5, 22),
         "Status": "Open",
         "Priority": "High",
@@ -115,6 +118,7 @@ ROUTINE_DATA = [
         "Action Point": "Policy for Dedicated Vehicles for SMUs",
         "Responsible": "GM(CMC)",
         "Accountable": "GM(CMC)",
+        "Open Date": date(2025, 2, 10),
         "Due Date": date(2025, 5, 22),
         "Status": "Open",
         "Priority": "Medium",
@@ -127,6 +131,7 @@ ROUTINE_DATA = [
         "Action Point": "Establishment of Test System Facility at SMU A-SMGCS",
         "Responsible": "In-Charge ASMGCS SMU/GM(CMC)",
         "Accountable": "GM(CMC)",
+        "Open Date": date(2025, 2, 15),
         "Due Date": date(2025, 5, 22),
         "Status": "In Progress",
         "Priority": "High",
@@ -139,6 +144,7 @@ ROUTINE_DATA = [
         "Action Point": "In-House ITC (Installation, Testing & Commissioning) for RADARs",
         "Responsible": "GM(CMC)/All ED(CNS)",
         "Accountable": "ED(CNS)",
+        "Open Date": date(2025, 3, 1),
         "Due Date": date(2025, 5, 22),
         "Status": "Open",
         "Priority": "High",
@@ -151,6 +157,7 @@ ROUTINE_DATA = [
         "Action Point": "Provision of broadband & firewall at A-SMGCS stations",
         "Responsible": "GM(CMC)",
         "Accountable": "GM(CMC)",
+        "Open Date": date(2025, 3, 10),
         "Due Date": date(2025, 5, 22),
         "Status": "Open",
         "Priority": "Medium",
@@ -163,6 +170,7 @@ ROUTINE_DATA = [
         "Action Point": "Standard packing & insurance for spares sent to SMU",
         "Responsible": "GM(CMC)",
         "Accountable": "GM(CMC)",
+        "Open Date": date(2025, 3, 15),
         "Due Date": date(2025, 5, 22),
         "Status": "In Progress",
         "Priority": "Medium",
@@ -175,6 +183,7 @@ ROUTINE_DATA = [
         "Action Point": "Surveillance SMU rep in CNS/ATM Automation spec committees",
         "Responsible": "GM(CMC)/GM(CNS-Aut)/ED(O&M)",
         "Accountable": "ED(O&M)",
+        "Open Date": date(2025, 3, 20),
         "Due Date": date(2025, 5, 22),
         "Status": "Open",
         "Priority": "Medium",
@@ -329,7 +338,7 @@ def create_routine_table(wb):
     # Define columns (including calculated columns)
     columns = [
         "Sl.No", "Action Point", "Responsible", "Accountable", 
-        "Due Date", "Status", "Priority", "SLA", 
+        "Open Date", "Due Date", "Status", "Priority", "SLA", 
         "Actions Taken", "Remarks", 
         "Days Remaining", "Days Open", "Overdue Flag"
     ]
@@ -346,29 +355,33 @@ def create_routine_table(wb):
         ws.cell(row=row_idx, column=2, value=item["Action Point"])
         ws.cell(row=row_idx, column=3, value=item["Responsible"])
         ws.cell(row=row_idx, column=4, value=item["Accountable"])
-        ws.cell(row=row_idx, column=5, value=item["Due Date"])
-        ws.cell(row=row_idx, column=6, value=item["Status"])
-        ws.cell(row=row_idx, column=7, value=item["Priority"])
-        ws.cell(row=row_idx, column=8, value=item["SLA"])
-        ws.cell(row=row_idx, column=9, value=item["Actions Taken"])
-        ws.cell(row=row_idx, column=10, value=item["Remarks"])
+        ws.cell(row=row_idx, column=5, value=item["Open Date"])
+        ws.cell(row=row_idx, column=6, value=item["Due Date"])
+        ws.cell(row=row_idx, column=7, value=item["Status"])
+        ws.cell(row=row_idx, column=8, value=item["Priority"])
+        ws.cell(row=row_idx, column=9, value=item["SLA"])
+        ws.cell(row=row_idx, column=10, value=item["Actions Taken"])
+        ws.cell(row=row_idx, column=11, value=item["Remarks"])
         
         # Calculated columns
+        open_date = item["Open Date"]
         due_date = item["Due Date"]
         days_remaining = (due_date - today).days
-        days_open = (today - due_date).days if item["Status"] != "Completed" else 0
+        # Days Open: Today - Open Date (how long the item has been open)
+        days_open = (today - open_date).days if item["Status"] != "Completed" else 0
         
-        ws.cell(row=row_idx, column=11, value=days_remaining)
-        ws.cell(row=row_idx, column=12, value=days_open)
+        ws.cell(row=row_idx, column=12, value=days_remaining)
+        ws.cell(row=row_idx, column=13, value=days_open)
         
         # Overdue Flag
         if days_remaining < 0 and item["Status"] != "Completed":
-            ws.cell(row=row_idx, column=13, value="OVERDUE")
+            ws.cell(row=row_idx, column=14, value="OVERDUE")
         else:
-            ws.cell(row=row_idx, column=13, value="")
+            ws.cell(row=row_idx, column=14, value="")
         
-        # Format date column
+        # Format date columns
         ws.cell(row=row_idx, column=5).number_format = "YYYY-MM-DD"
+        ws.cell(row=row_idx, column=6).number_format = "YYYY-MM-DD"
     
     # Apply borders to data area
     apply_borders(ws, 1, len(ROUTINE_DATA) + 1, 1, len(columns))
@@ -382,7 +395,7 @@ def create_routine_table(wb):
     status_dv.error = "Please select a valid Status"
     status_dv.errorTitle = "Invalid Status"
     ws.add_data_validation(status_dv)
-    status_dv.add(f"F2:F{len(ROUTINE_DATA) + 1}")
+    status_dv.add(f"G2:G{len(ROUTINE_DATA) + 1}")
     
     priority_dv = DataValidation(
         type="list",
@@ -392,7 +405,7 @@ def create_routine_table(wb):
     priority_dv.error = "Please select a valid Priority"
     priority_dv.errorTitle = "Invalid Priority"
     ws.add_data_validation(priority_dv)
-    priority_dv.add(f"G2:G{len(ROUTINE_DATA) + 1}")
+    priority_dv.add(f"H2:H{len(ROUTINE_DATA) + 1}")
     
     sla_dv = DataValidation(
         type="list",
@@ -402,31 +415,31 @@ def create_routine_table(wb):
     sla_dv.error = "Please select a valid SLA"
     sla_dv.errorTitle = "Invalid SLA"
     ws.add_data_validation(sla_dv)
-    sla_dv.add(f"H2:H{len(ROUTINE_DATA) + 1}")
+    sla_dv.add(f"I2:I{len(ROUTINE_DATA) + 1}")
     
     # Conditional Formatting
     last_row = len(ROUTINE_DATA) + 1
     
     # Red for overdue items (Days Remaining < 0 AND Status != Completed)
     red_rule = FormulaRule(
-        formula=['AND($K2<0,$F2<>"Completed")'],
+        formula=['AND($L2<0,$G2<>"Completed")'],
         fill=RED_FILL
     )
-    ws.conditional_formatting.add(f"A2:M{last_row}", red_rule)
+    ws.conditional_formatting.add(f"A2:N{last_row}", red_rule)
     
     # Yellow for items due within 7 days (Days Remaining 0-7 AND Status != Completed)
     yellow_rule = FormulaRule(
-        formula=['AND($K2>=0,$K2<=7,$F2<>"Completed")'],
+        formula=['AND($L2>=0,$L2<=7,$G2<>"Completed")'],
         fill=YELLOW_FILL
     )
-    ws.conditional_formatting.add(f"A2:M{last_row}", yellow_rule)
+    ws.conditional_formatting.add(f"A2:N{last_row}", yellow_rule)
     
     # Green for completed items
     green_rule = FormulaRule(
-        formula=['$F2="Completed"'],
+        formula=['$G2="Completed"'],
         fill=GREEN_FILL
     )
-    ws.conditional_formatting.add(f"A2:M{last_row}", green_rule)
+    ws.conditional_formatting.add(f"A2:N{last_row}", green_rule)
     
     # Freeze header row
     ws.freeze_panes = "A2"
